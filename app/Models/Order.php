@@ -7,15 +7,18 @@ use Ramsey\Uuid\Uuid;
 
 class Order extends Model
 {
-    const REFUND_STATUS_PENDING = 'pending';
-    const REFUND_STATUS_APPLIED = 'applied';
+    const REFUND_STATUS_PENDING    = 'pending';
+    const REFUND_STATUS_APPLIED    = 'applied';
     const REFUND_STATUS_PROCESSING = 'processing';
-    const REFUND_STATUS_SUCCESS = 'success';
-    const REFUND_STATUS_FAILED = 'failed';
+    const REFUND_STATUS_SUCCESS    = 'success';
+    const REFUND_STATUS_FAILED     = 'failed';
 
-    const SHIP_STATUS_PENDING = 'pending';
+    const SHIP_STATUS_PENDING   = 'pending';
     const SHIP_STATUS_DELIVERED = 'delivered';
-    const SHIP_STATUS_RECEIVED = 'received';
+    const SHIP_STATUS_RECEIVED  = 'received';
+
+    const TYPE_NORMAL       = 'normal';
+    const TYPE_CROWDFUNDING = 'crowdfunding';
 
     public static $refundStatusMap = [
         self::REFUND_STATUS_PENDING    => '未退款',
@@ -31,7 +34,13 @@ class Order extends Model
         self::SHIP_STATUS_RECEIVED  => '已收货',
     ];
 
+    public static $typeMap = [
+        self::TYPE_NORMAL       => '普通商品订单',
+        self::TYPE_CROWDFUNDING => '众筹商品订单',
+    ];
+
     protected $fillable = [
+        'type',
         'no',
         'address',
         'total_amount',
@@ -91,14 +100,14 @@ class Order extends Model
     {
         return $this->belongsTo(CouponCode::class);
     }
-    
+
     public static function findAvailableNo()
     {
         // 订单流水号前缀
         $prefix = date('YmdHis');
         for ($i = 0; $i < 10; $i++) {
             // 随机生成 6 位的数字
-            $no = $prefix.str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            $no = $prefix . str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
             // 判断是否已经存在
             if (!static::query()->where('no', $no)->exists()) {
                 return $no;
