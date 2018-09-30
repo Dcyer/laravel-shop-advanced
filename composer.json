@@ -6,6 +6,8 @@
     "type": "project",
     "require": {
         "php": ">=7.0.0",
+        "barryvdh/laravel-ide-helper": "^2.5",
+        "doctrine/dbal": " ~2.3",
         "encore/laravel-admin": "1.6.0",
         "endroid/qr-code": "^3.2",
         "fideloper/proxy": "~3.3",
