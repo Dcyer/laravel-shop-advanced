@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Exceptions\InternalException;
+use App\Models\CrowdfundingProduct;
 use App\Models\Order;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
