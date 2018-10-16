@@ -3,14 +3,69 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\InvalidRequestException;
+use App\Models\Installment;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use Carbon\Carbon;
 use Endroid\QrCode\QrCode;
 use App\Events\OrderPaid;
+use Illuminate\Validation\Rule;
 
 class PaymentController extends Controller
 {
+    public function payByInstallment(Order $order, Request $request)
+    {
+        // 判断订单是否属于当前用户
+        $this->authorize('own', $order);
+        // 订单已支付或者已关闭
+        if ($order->paid_at || $order->closed) {
+            throw new InvalidRequestException('订单状态不正确');
+        }
+        // 校验用户提交的还款月数，数值必须是配置好的费率的期数
+        $this->validate($request, [
+            'count' => ['required', Rule::in(array_keys(config('app.installment_fee_rate')))],
+        ]);
+        // 删除同一笔商品订单发起过其它的状态是未支付的分期付款，避免同一笔商品订单有过个分期付款
+        Installment::query()
+            ->where('order_id', $order->id)
+            ->where('status', Installment::STATUS_PENDING)
+            ->delete();
+        $count = $request->input('count');
+        // 创建一个新的分期付款对象
+        $installment = new Installment([
+            'total_amount' => $order->total_amount,
+            'count'        => $count,
+            'fee_rate'     => config('app.installment_fee_rate')[$count],
+            'fine_rate'    => config('app.installment_fine_rate'),
+        ]);
+        $installment->user()->associate($request->user());
+        $installment->order()->associate($order);
+        $installment->save();
+        // 第一期的还款截止日期为明天凌晨 0 点
+        $dueDate = Carbon::tomorrow();
+        // 计算第一期的本金
+        $base = big_number($order->total_amount)->divide($count)->getValue();
+        // 计算每一期的手续费
+        $fee = big_number($base)->multiply($installment->fee_rate)->divide(100)->getValue();
+        // 根据用户选择的还款期数，创建对应数量的还款计划
+        for ($i = 0; $i < $count; $i++) {
+            // 最后一期的本金需要用到总本金减去前面几期的本金
+            if ($i === $count - 1) {
+                $base = big_number($order->total_amount)->subtract(big_number($base)->multiply($count - 1));
+            }
+            $installment->items()->create([
+                'sequence' => $i,
+                'base'     => $base,
+                'fee'      => $fee,
+                'due_date' => $dueDate,
+            ]);
+            // 还款截止日期
+            $dueDate = $dueDate->copy()->addDays(30);
+        }
+
+        return $installment;
+    }
+
     public function payByAlipay(Order $order, Request $request)
     {
         // 判断订单是否属于当前用户
@@ -24,7 +79,7 @@ class PaymentController extends Controller
         return app('alipay')->web([
             'out_trade_no' => $order->no, // 订单编号，需保证在商户端不重复
             'total_amount' => $order->total_amount, // 订单金额，单位元，支持小数点后两位
-            'subject'      => '支付 Laravel Shop 的订单：'.$order->no, // 订单标题
+            'subject'      => '支付 Laravel Shop 的订单：' . $order->no, // 订单标题
         ]);
     }
 
@@ -34,12 +89,12 @@ class PaymentController extends Controller
         if ($order->paid_at || $order->closed) {
             throw new InvalidRequestException('订单状态不正确');
         }
-        
+
         // 之前是直接返回，现在把返回值放到一个变量里
         $wechatOrder = app('wechat_pay')->scan([
             'out_trade_no' => $order->no,
             'total_fee'    => $order->total_amount * 100,
-            'body'         => '支付 Laravel Shop 的订单：'.$order->no,
+            'body'         => '支付 Laravel Shop 的订单：' . $order->no,
         ]);
         // 把要转换的字符串作为 QrCode 的构造函数参数
         $qrCode = new QrCode($wechatOrder->code_url);
@@ -62,7 +117,7 @@ class PaymentController extends Controller
     public function alipayNotify()
     {
         // 校验输入参数
-        $data  = app('alipay')->verify();
+        $data = app('alipay')->verify();
         // $data->out_trade_no 拿到订单流水号，并在数据库中查询
         $order = Order::where('no', $data->out_trade_no)->first();
         // 正常来说不太可能出现支付了一笔不存在的订单，这个判断只是加强系统健壮性。
@@ -74,7 +129,7 @@ class PaymentController extends Controller
             // 返回数据给支付宝
             return app('alipay')->success();
         }
-        
+
         $order->update([
             'paid_at'        => Carbon::now(), // 支付时间
             'payment_method' => 'alipay', // 支付方式
@@ -88,7 +143,7 @@ class PaymentController extends Controller
     public function wechatNotify()
     {
         // 校验回调参数是否正确
-        $data  = app('wechat_pay')->verify();
+        $data = app('wechat_pay')->verify();
         // 找到对应的订单
         $order = Order::where('no', $data->out_trade_no)->first();
         // 订单不存在则告知微信支付
@@ -121,10 +176,10 @@ class PaymentController extends Controller
     {
         // 给微信的失败响应
         $failXml = '<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[FAIL]]></return_msg></xml>';
-        $data = app('wechat_pay')->verify(null, true);
+        $data    = app('wechat_pay')->verify(null, true);
 
         // 没有找到对应的订单，原则上不可能发生，保证代码健壮性
-        if(!$order = Order::where('no', $data['out_trade_no'])->first()) {
+        if (!$order = Order::where('no', $data['out_trade_no'])->first()) {
             return $failXml;
         }
 
@@ -135,7 +190,7 @@ class PaymentController extends Controller
             ]);
         } else {
             // 退款失败，将具体状态存入 extra 字段，并表退款状态改成失败
-            $extra = $order->extra;
+            $extra                       = $order->extra;
             $extra['refund_failed_code'] = $data['refund_status'];
             $order->update([
                 'refund_status' => Order::REFUND_STATUS_FAILED,
