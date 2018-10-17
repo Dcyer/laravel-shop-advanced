@@ -65,8 +65,18 @@ class Product extends Model
 
     public function toESArray()
     {
+        // 只取出需要的字段
         $arr = array_only($this->toArray(), [
-            'id', 'type', 'title', 'category_id', 'long_title', 'on_sale', 'rating', 'sold_count', 'review_count', 'price',
+            'id',
+            'type',
+            'title',
+            'category_id',
+            'long_title',
+            'on_sale',
+            'rating',
+            'sold_count',
+            'review_count',
+            'price',
         ]);
 
         // 如果商品有类目，则 category 字段为类目名数组，否则为空字符串
