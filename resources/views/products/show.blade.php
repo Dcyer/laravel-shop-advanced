@@ -47,8 +47,8 @@
                                         </div>
                                     @endif
                                 </div>
-                        @else
-                            <!-- 原普通商品模块开始 -->
+                            @else
+                                <!-- 原普通商品模块开始 -->
                                 <div class="price"><label>价格</label><em>￥</em><span>{{ $product->price }}</span></div>
                                 <div class="sales_and_reviews">
                                     <div class="sold_count">累计销量 <span class="count">{{ $product->sold_count }}</span>
@@ -60,8 +60,8 @@
                                     </div>
                                 </div>
                                 <!-- 原普通商品模块结束 -->
-                        @endif
-                        <!-- 众筹商品模块结束 -->
+                            @endif
+                            <!-- 众筹商品模块结束 -->
                             <div class="skus">
                                 <label>选择</label>
                                 <div class="btn-group" data-toggle="buttons">
@@ -79,16 +79,18 @@
                                     @endforeach
                                 </div>
                             </div>
-                            <div class="cart_amount"><label>数量</label><input type="text" class="form-control input-sm"
-                                                                             value="1"><span>件</span><span
-                                        class="stock"></span></div>
+                            <div class="cart_amount"><label>数量</label>
+                                <input type="text" class="form-control input-sm" value="1">
+                                <span>件</span>
+                                <span class="stock"></span>
+                            </div>
                             <div class="buttons">
                                 @if($favored)
                                     <button class="btn btn-danger btn-disfavor">取消收藏</button>
                                 @else
                                     <button class="btn btn-success btn-favor">❤ 收藏</button>
                                 @endif
-                            <!-- 众筹商品下单按钮开始 -->
+                                <!-- 众筹商品下单按钮开始 -->
                                 @if($product->type === \App\Models\Product::TYPE_CROWDFUNDING)
                                     @if(Auth::check())
                                         @if($product->crowdfunding->status === \App\Models\CrowdfundingProduct::STATUS_FUNDING)
@@ -103,22 +105,36 @@
                                     @endif
                                 @else
                                     <button class="btn btn-primary btn-add-to-cart">加入购物车</button>
-                            @endif
-                            <!-- 众筹商品下单按钮结束 -->
+                                @endif
+                                <!-- 众筹商品下单按钮结束 -->
                             </div>
                         </div>
                     </div>
                     <div class="product-detail">
                         <ul class="nav nav-tabs" role="tablist">
-                            <li role="presentation" class="active"><a href="#product-detail-tab"
-                                                                      aria-controls="product-detail-tab" role="tab"
-                                                                      data-toggle="tab">商品详情</a></li>
-                            <li role="presentation"><a href="#product-reviews-tab" aria-controls="product-reviews-tab"
-                                                       role="tab" data-toggle="tab">用户评价</a></li>
+                            <li role="presentation" class="active">
+                                <a href="#product-detail-tab" aria-controls="product-detail-tab" role="tab" data-toggle="tab">商品详情</a>
+                            </li>
+                            <li role="presentation">
+                                <a href="#product-reviews-tab" aria-controls="product-reviews-tab" role="tab" data-toggle="tab">用户评价</a>
+                            </li>
                         </ul>
                         <div class="tab-content">
                             <div role="tabpanel" class="tab-pane active" id="product-detail-tab">
-                                {!! $product->description !!}
+                                <!-- 产品属性开始 -->
+                                <div class="properties-list">
+                                    <div class="properties-list-title">产品参数：</div>
+                                    <ul class="properties-list-body">
+                                        @foreach($product->grouped_properties as $name => $values)
+                                            <li>{{ $name }}：{{ join(' ', $values) }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                                <!-- 产品属性结束 -->
+                                <!-- 在商品描述外面包了一层 div -->
+                                <div class="product-description">
+                                    {!! $product->description !!}
+                                </div>
                             </div>
                             <div role="tabpanel" class="tab-pane" id="product-reviews-tab">
                                 <!-- 评论列表开始 -->
