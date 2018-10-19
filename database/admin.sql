@@ -21,7 +21,7 @@
 
 LOCK TABLES `admin_menu` WRITE;
 /*!40000 ALTER TABLE `admin_menu` DISABLE KEYS */;
-INSERT INTO `admin_menu` VALUES (1,0,1,'首页','fa-bar-chart','/',NULL,'2018-05-31 23:30:13'),(2,0,9,'系统管理','fa-tasks',NULL,NULL,'2018-09-30 09:01:37'),(3,2,10,'管理员','fa-users','auth/users',NULL,'2018-09-30 09:01:37'),(4,2,11,'角色','fa-user','auth/roles',NULL,'2018-09-30 09:01:37'),(5,2,12,'权限','fa-ban','auth/permissions',NULL,'2018-09-30 09:01:37'),(6,2,13,'菜单','fa-bars','auth/menu',NULL,'2018-09-30 09:01:37'),(7,2,14,'操作日志','fa-history','auth/logs',NULL,'2018-09-30 09:01:37'),(8,0,2,'用户管理','fa-users','/users','2018-05-31 23:54:14','2018-05-31 23:55:10'),(9,0,4,'商品管理','fa-cubes','/products','2018-06-01 00:28:19','2018-09-30 06:23:45'),(10,0,7,'订单管理','fa-rmb','/orders','2018-06-05 02:45:54','2018-09-30 09:01:37'),(11,0,8,'优惠券管理','fa-tags','/coupon_codes','2018-06-05 07:33:54','2018-09-30 09:01:37'),(12,0,3,'类目管理','fa-bars','/categories','2018-09-30 06:23:34','2018-09-30 06:23:45'),(13,9,6,'众筹商品','fa-flag-checkered','/crowdfunding_products','2018-09-30 09:00:27','2018-09-30 09:01:37'),(14,9,5,'普通商品','fa-cubes','/products','2018-09-30 09:01:05','2018-09-30 09:01:37');
+INSERT INTO `admin_menu` VALUES (1,0,1,'首页','fa-bar-chart','/',NULL,'2018-05-31 23:30:13'),(2,0,10,'系统管理','fa-tasks',NULL,NULL,'2018-10-19 03:10:35'),(3,2,11,'管理员','fa-users','auth/users',NULL,'2018-10-19 03:10:35'),(4,2,12,'角色','fa-user','auth/roles',NULL,'2018-10-19 03:10:35'),(5,2,13,'权限','fa-ban','auth/permissions',NULL,'2018-10-19 03:10:35'),(6,2,14,'菜单','fa-bars','auth/menu',NULL,'2018-10-19 03:10:35'),(7,2,15,'操作日志','fa-history','auth/logs',NULL,'2018-10-19 03:10:35'),(8,0,2,'用户管理','fa-users','/users','2018-05-31 23:54:14','2018-05-31 23:55:10'),(9,0,4,'商品管理','fa-cubes','/products','2018-06-01 00:28:19','2018-09-30 06:23:45'),(10,0,8,'订单管理','fa-rmb','/orders','2018-06-05 02:45:54','2018-10-19 03:10:35'),(11,0,9,'优惠券管理','fa-tags','/coupon_codes','2018-06-05 07:33:54','2018-10-19 03:10:35'),(12,0,3,'类目管理','fa-bars','/categories','2018-09-30 06:23:34','2018-09-30 06:23:45'),(13,9,6,'众筹商品','fa-flag-checkered','/crowdfunding_products','2018-09-30 09:00:27','2018-09-30 09:01:37'),(14,9,5,'普通商品','fa-cubes','/products','2018-09-30 09:01:05','2018-09-30 09:01:37'),(15,9,7,'秒杀商品','fa-bolt','/seckill_products','2018-10-19 03:10:29','2018-10-19 03:10:35');
 /*!40000 ALTER TABLE `admin_menu` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -103,4 +103,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-09-30 17:08:38
+-- Dump completed on 2018-10-19 11:15:22
